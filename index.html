@@ -9,7 +9,7 @@ body {
     background-color: rgb(255, 255, 255);
 }
 canvas {
-    background-color: rgb(0, 0, 0);
+    background-color: rgb(124, 235, 255);
 }
 </style>
 </head>
@@ -43,13 +43,12 @@ class Rectangulo {
     }
 }
 
-
 var pacmanImage = new Image();
-pacmanImage.src = 'pac-man.png';
-
+pacmanImage.src = 'tiburon.png';
 
 var player = new Rectangulo("red", 30, 30, 100, 100, 5);
 
+//azules
 
 walls.push(new Rectangulo("blue", 800, 10, 0, 390, null)); 
 walls.push(new Rectangulo("blue", 800, 10, 0, 0, null));    
@@ -57,6 +56,43 @@ walls.push(new Rectangulo("blue", 10, 180, 0, 0, null));
 walls.push(new Rectangulo("blue", 10, 180, 790, 0, null));  
 walls.push(new Rectangulo("blue", 10, 180, 0, 220, null));  
 walls.push(new Rectangulo("blue", 10, 180, 790, 220, null));
+
+
+//medio
+walls.push(new Rectangulo("white", 65, 65, 150, 168, null));
+walls.push(new Rectangulo("white", 65, 65, 294, 168, null));
+walls.push(new Rectangulo("white", 65, 65, 438, 168, null));
+walls.push(new Rectangulo("white", 65, 65, 578, 168, null));
+walls.push(new Rectangulo("white", 80, 10, 10, 170, null));
+walls.push(new Rectangulo("white", 80, 10, 10, 220, null));
+walls.push(new Rectangulo("white", 80, 10, 710, 170, null));
+walls.push(new Rectangulo("white", 80, 10, 710, 220, null));
+
+//arriba
+
+walls.push(new Rectangulo("white", 40, 10, 720, 40, null));
+walls.push(new Rectangulo("white", 40, 10, 40, 40, null));
+walls.push(new Rectangulo("white", 490, 10, 150, 40, null));
+walls.push(new Rectangulo("white", 10, 80, 397, 50, null));
+walls.push(new Rectangulo("white", 65, 10, 510, 85, null));
+walls.push(new Rectangulo("white", 65, 10, 220, 85, null));
+walls.push(new Rectangulo("white", 65, 10, 370, 85, null));
+
+
+//abajo
+
+walls.push(new Rectangulo("white", 490, 10, 150, 345, null));
+walls.push(new Rectangulo("white", 40, 10, 40, 345, null));
+walls.push(new Rectangulo("white", 40, 10, 720, 345, null));
+walls.push(new Rectangulo("white", 10, 80, 397, 265, null));
+walls.push(new Rectangulo("white", 65, 10, 510, 300, null));
+walls.push(new Rectangulo("white", 65, 10, 220, 300, null));
+walls.push(new Rectangulo("white", 65, 10, 370, 300, null));
+
+
+
+
+
 
 var direccion = '';
 var speed = 2;
@@ -106,7 +142,6 @@ function update() {
             break;
     }
 
-  
     walls.forEach(function(wall) {
         if (player.colision(wall)) {
             switch(direccion) {
@@ -130,10 +165,8 @@ function update() {
 function paint() {
     ctx.clearRect(0, 0, 800, 400);
 
-   
     ctx.drawImage(pacmanImage, player.x, player.y, player.w, player.h);
 
-    
     walls.forEach(function(wall) {
         ctx.fillStyle = wall.color;
         ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
@@ -143,7 +176,6 @@ function paint() {
     update();
     requestAnimationFrame(paint); 
 }
-
 
 pacmanImage.onload = function() {
     requestAnimationFrame(paint); 
