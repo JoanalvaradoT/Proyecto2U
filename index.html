@@ -21,6 +21,7 @@ canvas {
 const myCanvas = document.getElementById("myCanvas");
 const ctx = myCanvas.getContext("2d");
 
+var sonido = new Audio('bless.mp3');
 var walls = [];
 
 class Rectangulo {
@@ -48,6 +49,10 @@ pacmanImage.src = 'tiburon.png';
 
 var player = new Rectangulo("red", 30, 30, 100, 100, 5);
 
+var direction = '';
+var rotationAngle = 0;
+var speed = 1;
+
 //azules
 
 walls.push(new Rectangulo("blue", 800, 10, 0, 390, null)); 
@@ -59,6 +64,7 @@ walls.push(new Rectangulo("blue", 10, 180, 790, 220, null));
 
 
 //medio
+
 walls.push(new Rectangulo("white", 65, 65, 150, 168, null));
 walls.push(new Rectangulo("white", 65, 65, 294, 168, null));
 walls.push(new Rectangulo("white", 65, 65, 438, 168, null));
@@ -67,16 +73,36 @@ walls.push(new Rectangulo("white", 80, 10, 10, 170, null));
 walls.push(new Rectangulo("white", 80, 10, 10, 220, null));
 walls.push(new Rectangulo("white", 80, 10, 710, 170, null));
 walls.push(new Rectangulo("white", 80, 10, 710, 220, null));
+walls.push(new Rectangulo("white", 78, 10, 360, 223, null));
+walls.push(new Rectangulo("white", 10, 25, 535, 190, null));
+walls.push(new Rectangulo("white", 10, 25, 250, 190, null));
 
 //arriba
 
 walls.push(new Rectangulo("white", 40, 10, 720, 40, null));
 walls.push(new Rectangulo("white", 40, 10, 40, 40, null));
 walls.push(new Rectangulo("white", 490, 10, 150, 40, null));
-walls.push(new Rectangulo("white", 10, 80, 397, 50, null));
-walls.push(new Rectangulo("white", 65, 10, 510, 85, null));
-walls.push(new Rectangulo("white", 65, 10, 220, 85, null));
-walls.push(new Rectangulo("white", 65, 10, 370, 85, null));
+walls.push(new Rectangulo("white", 10, 80, 395, 50, null));
+walls.push(new Rectangulo("white", 60, 10, 510, 85, null));
+walls.push(new Rectangulo("white", 60, 10, 220, 85, null));
+walls.push(new Rectangulo("white", 60, 10, 370, 85, null));
+walls.push(new Rectangulo("white", 66, 10, 725, 90, null));
+walls.push(new Rectangulo("white", 60, 10, 10, 90, null));
+walls.push(new Rectangulo("white", 10, 65, 175, 103, null));
+walls.push(new Rectangulo("white", 10, 65, 320, 103, null));
+walls.push(new Rectangulo("white", 10, 65, 465, 103, null));
+walls.push(new Rectangulo("white", 10, 65, 605, 103, null));
+walls.push(new Rectangulo("white", 10, 65, 675, 10, null));
+walls.push(new Rectangulo("white", 10, 65, 110, 10, null));
+walls.push(new Rectangulo("white", 5, 5, 45, 132, null));
+walls.push(new Rectangulo("white", 5, 5, 110, 132, null));
+walls.push(new Rectangulo("white", 5, 5, 245, 132, null));
+walls.push(new Rectangulo("white", 5, 5, 535, 132, null));
+walls.push(new Rectangulo("white", 5, 5, 740, 132, null));
+walls.push(new Rectangulo("white", 5, 5, 675, 132, null));
+walls.push(new Rectangulo("white", 5, 5, 675, 132, null));
+
+
 
 
 //abajo
@@ -84,38 +110,67 @@ walls.push(new Rectangulo("white", 65, 10, 370, 85, null));
 walls.push(new Rectangulo("white", 490, 10, 150, 345, null));
 walls.push(new Rectangulo("white", 40, 10, 40, 345, null));
 walls.push(new Rectangulo("white", 40, 10, 720, 345, null));
-walls.push(new Rectangulo("white", 10, 80, 397, 265, null));
-walls.push(new Rectangulo("white", 65, 10, 510, 300, null));
-walls.push(new Rectangulo("white", 65, 10, 220, 300, null));
-walls.push(new Rectangulo("white", 65, 10, 370, 300, null));
+walls.push(new Rectangulo("white", 10, 80, 395, 265, null));
+walls.push(new Rectangulo("white", 60, 10, 510, 300, null));
+walls.push(new Rectangulo("white", 60, 10, 220, 300, null));
+walls.push(new Rectangulo("white", 60, 10, 370, 300, null));
+walls.push(new Rectangulo("white", 60, 10, 10, 300, null));
+walls.push(new Rectangulo("white", 65, 10, 725, 300, null));
+walls.push(new Rectangulo("white", 10, 65, 175, 233, null));
+walls.push(new Rectangulo("white", 10, 65, 320, 233, null));
+walls.push(new Rectangulo("white", 10, 65, 465, 233, null));
+walls.push(new Rectangulo("white", 10, 65, 605, 233, null));
+walls.push(new Rectangulo("white", 10, 65, 675, 325, null));
+walls.push(new Rectangulo("white", 10, 65, 110, 325, null));
+walls.push(new Rectangulo("white", 5, 5, 45, 260, null));
+walls.push(new Rectangulo("white", 5, 5, 110, 260, null));
+walls.push(new Rectangulo("white", 5, 5,245, 260, null));
+walls.push(new Rectangulo("white", 5, 5, 535, 260, null));
+walls.push(new Rectangulo("white", 5, 5, 740, 260, null));
+walls.push(new Rectangulo("white", 5, 5, 675, 260, null));
 
 
-
-
-
-
-var direccion = '';
-var speed = 2;
+function rotatePlayer() {
+    switch (direction) {
+        case 'up':
+            rotationAngle = -Math.PI / 2; 
+            break;
+        case 'down':
+            rotationAngle = Math.PI / 2; 
+            break;
+        case 'left':
+            rotationAngle = Math.PI; 
+            break;
+        case 'right':
+            rotationAngle = 0; 
+            break;
+    }
+}
 
 document.addEventListener('keypress', function(e) {
     switch(e.keyCode) {
         case 119: 
-            direccion = 'up';
+            direction = 'up';
+            sonido.play();
             break;
         case 115: 
-            direccion = 'down';
+            direction = 'down';
+            sonido.play();
             break;
         case 97:  
-            direccion = 'left';
+            direction = 'left';
+            sonido.play();
             break;
         case 100: 
-            direccion = 'right';
+            direction = 'right';
+            sonido.play();
             break;
     }
+    rotatePlayer();
 });
 
 function update() {
-    switch(direccion) {
+    switch(direction) {
         case 'up': 
             player.y -= speed;
             if (player.y < 0) {
@@ -144,7 +199,7 @@ function update() {
 
     walls.forEach(function(wall) {
         if (player.colision(wall)) {
-            switch(direccion) {
+            switch(direction) {
                 case 'up':
                     player.y += speed;
                     break;
@@ -165,7 +220,18 @@ function update() {
 function paint() {
     ctx.clearRect(0, 0, 800, 400);
 
-    ctx.drawImage(pacmanImage, player.x, player.y, player.w, player.h);
+   
+    ctx.save();
+    
+    
+    ctx.translate(player.x + player.w / 2, player.y + player.h / 2);
+    ctx.rotate(rotationAngle);
+
+    
+    ctx.drawImage(pacmanImage, -player.w / 2, -player.h / 2, player.w, player.h);
+
+   
+    ctx.restore();
 
     walls.forEach(function(wall) {
         ctx.fillStyle = wall.color;
