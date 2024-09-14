@@ -1,252 +1,333 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Canvas</title>
-<style type="text/css">
-body {
-    background-color: rgb(255, 255, 255);
-}
-canvas {
-    background-color: rgb(124, 235, 255);
-}
-</style>
-</head>
-<body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Canvas</title>
+    <style type="text/css">
+      body {
+        background-color: rgb(255, 255, 255);
+      }
+      canvas {
+        background-color: rgb(124, 235, 255);
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="miCanvas" width="800" height="400"></canvas>
+    <p id="temporizador" style="font-size: 20px">Tiempo: 0 | Puntuación: 0</p>
 
-<canvas id="myCanvas" width="800" height="400"></canvas>
+    <script type="text/javascript">
+      const miCanvas = document.getElementById("miCanvas");
+      const ctx = miCanvas.getContext("2d");
+      const temporizador = document.getElementById("temporizador");
 
-<script type="text/javascript">
-const myCanvas = document.getElementById("myCanvas");
-const ctx = myCanvas.getContext("2d");
+      var sonido = new Audio("bless.mp3");
+      var paredes = [];
+      var puntos = [];
+      var puntuacion = 0;
 
-var sonido = new Audio('bless.mp3');
-var walls = [];
+      class Rectangulo {
+        constructor(color, w, h, x, y, velocidad) {
+          this.color = color;
+          this.w = w;
+          this.h = h;
+          this.x = x;
+          this.y = y;
+          this.velocidad = velocidad;
+        }
 
-class Rectangulo {
-    constructor(color, w, h, x, y, speed) {
-        this.color = color;
-        this.w = w;
-        this.h = h;
-        this.x = x;
-        this.y = y;
-        this.speed = speed; 
-    }
-
-    colision(otro) {
-        return (
+        colision(otro) {
+          return (
             this.x < otro.x + otro.w &&
             this.x + this.w > otro.x &&
             this.y < otro.y + otro.h &&
             this.y + this.h > otro.y
-        );
-    }
-}
-
-var pacmanImage = new Image();
-pacmanImage.src = 'tiburon.png';
-
-var player = new Rectangulo("red", 30, 30, 100, 100, 5);
-
-var direction = '';
-var rotationAngle = 0;
-var speed = 1;
-
-//azules
-
-walls.push(new Rectangulo("blue", 800, 10, 0, 390, null)); 
-walls.push(new Rectangulo("blue", 800, 10, 0, 0, null));    
-walls.push(new Rectangulo("blue", 10, 180, 0, 0, null));    
-walls.push(new Rectangulo("blue", 10, 180, 790, 0, null));  
-walls.push(new Rectangulo("blue", 10, 180, 0, 220, null));  
-walls.push(new Rectangulo("blue", 10, 180, 790, 220, null));
-
-
-//medio
-
-walls.push(new Rectangulo("white", 65, 65, 150, 168, null));
-walls.push(new Rectangulo("white", 65, 65, 294, 168, null));
-walls.push(new Rectangulo("white", 65, 65, 438, 168, null));
-walls.push(new Rectangulo("white", 65, 65, 578, 168, null));
-walls.push(new Rectangulo("white", 80, 10, 10, 170, null));
-walls.push(new Rectangulo("white", 80, 10, 10, 220, null));
-walls.push(new Rectangulo("white", 80, 10, 710, 170, null));
-walls.push(new Rectangulo("white", 80, 10, 710, 220, null));
-walls.push(new Rectangulo("white", 78, 10, 360, 223, null));
-walls.push(new Rectangulo("white", 10, 25, 535, 190, null));
-walls.push(new Rectangulo("white", 10, 25, 250, 190, null));
-
-//arriba
-
-walls.push(new Rectangulo("white", 40, 10, 720, 40, null));
-walls.push(new Rectangulo("white", 40, 10, 40, 40, null));
-walls.push(new Rectangulo("white", 490, 10, 150, 40, null));
-walls.push(new Rectangulo("white", 10, 80, 395, 50, null));
-walls.push(new Rectangulo("white", 60, 10, 510, 85, null));
-walls.push(new Rectangulo("white", 60, 10, 220, 85, null));
-walls.push(new Rectangulo("white", 60, 10, 370, 85, null));
-walls.push(new Rectangulo("white", 66, 10, 725, 90, null));
-walls.push(new Rectangulo("white", 60, 10, 10, 90, null));
-walls.push(new Rectangulo("white", 10, 65, 175, 103, null));
-walls.push(new Rectangulo("white", 10, 65, 320, 103, null));
-walls.push(new Rectangulo("white", 10, 65, 465, 103, null));
-walls.push(new Rectangulo("white", 10, 65, 605, 103, null));
-walls.push(new Rectangulo("white", 10, 65, 675, 10, null));
-walls.push(new Rectangulo("white", 10, 65, 110, 10, null));
-walls.push(new Rectangulo("white", 5, 5, 45, 132, null));
-walls.push(new Rectangulo("white", 5, 5, 110, 132, null));
-walls.push(new Rectangulo("white", 5, 5, 245, 132, null));
-walls.push(new Rectangulo("white", 5, 5, 535, 132, null));
-walls.push(new Rectangulo("white", 5, 5, 740, 132, null));
-walls.push(new Rectangulo("white", 5, 5, 675, 132, null));
-walls.push(new Rectangulo("white", 5, 5, 675, 132, null));
-
-
-
-
-//abajo
-
-walls.push(new Rectangulo("white", 490, 10, 150, 345, null));
-walls.push(new Rectangulo("white", 40, 10, 40, 345, null));
-walls.push(new Rectangulo("white", 40, 10, 720, 345, null));
-walls.push(new Rectangulo("white", 10, 80, 395, 265, null));
-walls.push(new Rectangulo("white", 60, 10, 510, 300, null));
-walls.push(new Rectangulo("white", 60, 10, 220, 300, null));
-walls.push(new Rectangulo("white", 60, 10, 370, 300, null));
-walls.push(new Rectangulo("white", 60, 10, 10, 300, null));
-walls.push(new Rectangulo("white", 65, 10, 725, 300, null));
-walls.push(new Rectangulo("white", 10, 65, 175, 233, null));
-walls.push(new Rectangulo("white", 10, 65, 320, 233, null));
-walls.push(new Rectangulo("white", 10, 65, 465, 233, null));
-walls.push(new Rectangulo("white", 10, 65, 605, 233, null));
-walls.push(new Rectangulo("white", 10, 65, 675, 325, null));
-walls.push(new Rectangulo("white", 10, 65, 110, 325, null));
-walls.push(new Rectangulo("white", 5, 5, 45, 260, null));
-walls.push(new Rectangulo("white", 5, 5, 110, 260, null));
-walls.push(new Rectangulo("white", 5, 5,245, 260, null));
-walls.push(new Rectangulo("white", 5, 5, 535, 260, null));
-walls.push(new Rectangulo("white", 5, 5, 740, 260, null));
-walls.push(new Rectangulo("white", 5, 5, 675, 260, null));
-
-
-function rotatePlayer() {
-    switch (direction) {
-        case 'up':
-            rotationAngle = -Math.PI / 2; 
-            break;
-        case 'down':
-            rotationAngle = Math.PI / 2; 
-            break;
-        case 'left':
-            rotationAngle = Math.PI; 
-            break;
-        case 'right':
-            rotationAngle = 0; 
-            break;
-    }
-}
-
-document.addEventListener('keypress', function(e) {
-    switch(e.keyCode) {
-        case 119: 
-            direction = 'up';
-            sonido.play();
-            break;
-        case 115: 
-            direction = 'down';
-            sonido.play();
-            break;
-        case 97:  
-            direction = 'left';
-            sonido.play();
-            break;
-        case 100: 
-            direction = 'right';
-            sonido.play();
-            break;
-    }
-    rotatePlayer();
-});
-
-function update() {
-    switch(direction) {
-        case 'up': 
-            player.y -= speed;
-            if (player.y < 0) {
-                player.y = myCanvas.height;
-            }
-            break;
-        case 'down': 
-            player.y += speed;
-            if (player.y > myCanvas.height) {
-                player.y = 0;
-            }
-            break;
-        case 'left': 
-            player.x -= speed;
-            if (player.x < 0) {
-                player.x = myCanvas.width;
-            }
-            break;
-        case 'right': 
-            player.x += speed;
-            if (player.x > myCanvas.width) {
-                player.x = 0;
-            }
-            break;
-    }
-
-    walls.forEach(function(wall) {
-        if (player.colision(wall)) {
-            switch(direction) {
-                case 'up':
-                    player.y += speed;
-                    break;
-                case 'down':
-                    player.y -= speed;
-                    break;
-                case 'left':
-                    player.x += speed;
-                    break;
-                case 'right':
-                    player.x -= speed;
-                    break;
-            }
+          );
         }
-    });
-}
+      }
 
-function paint() {
-    ctx.clearRect(0, 0, 800, 400);
+      class Punto {
+        constructor(x, y, radio, color) {
+          this.x = x;
+          this.y = y;
+          this.radio = radio;
+          this.color = color;
+        }
 
-   
-    ctx.save();
-    
-    
-    ctx.translate(player.x + player.w / 2, player.y + player.h / 2);
-    ctx.rotate(rotationAngle);
+        dibujar() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radio, 0, 2 * Math.PI, false);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+        }
+      }
 
-    
-    ctx.drawImage(pacmanImage, -player.w / 2, -player.h / 2, player.w, player.h);
+      var imagenPacman = new Image();
+      imagenPacman.src = "tiburon.png";
 
-   
-    ctx.restore();
+      var jugador = new Rectangulo("red", 30, 30, 100, 100, 5);
 
-    walls.forEach(function(wall) {
-        ctx.fillStyle = wall.color;
-        ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
-        ctx.strokeRect(wall.x, wall.y, wall.w, wall.h);
-    });
+      var direccion = "";
+      var anguloRotacion = 0;
+      var velocidad = 1;
+      var inicioTiempo = null;
+      var tiempoIniciado = false;
 
-    update();
-    requestAnimationFrame(paint); 
-}
+      //azules
 
-pacmanImage.onload = function() {
-    requestAnimationFrame(paint); 
-};
+      paredes.push(new Rectangulo("blue", 800, 10, 0, 390, null));
+      paredes.push(new Rectangulo("blue", 800, 10, 0, 0, null));
+      paredes.push(new Rectangulo("blue", 10, 180, 0, 0, null));
+      paredes.push(new Rectangulo("blue", 10, 180, 790, 0, null));
+      paredes.push(new Rectangulo("blue", 10, 180, 0, 220, null));
+      paredes.push(new Rectangulo("blue", 10, 180, 790, 220, null));
 
-</script>
-</body>
+      //medio
+
+      paredes.push(new Rectangulo("white", 65, 65, 150, 168, null));
+      paredes.push(new Rectangulo("white", 65, 65, 294, 168, null));
+      paredes.push(new Rectangulo("white", 65, 65, 438, 168, null));
+      paredes.push(new Rectangulo("white", 65, 65, 578, 168, null));
+      paredes.push(new Rectangulo("white", 80, 10, 10, 170, null));
+      paredes.push(new Rectangulo("white", 80, 10, 10, 220, null));
+      paredes.push(new Rectangulo("white", 80, 10, 710, 170, null));
+      paredes.push(new Rectangulo("white", 80, 10, 710, 220, null));
+      paredes.push(new Rectangulo("white", 78, 10, 360, 223, null));
+      paredes.push(new Rectangulo("white", 10, 25, 535, 190, null));
+      paredes.push(new Rectangulo("white", 10, 25, 250, 190, null));
+
+      //arriba
+
+      paredes.push(new Rectangulo("white", 40, 10, 720, 40, null));
+      paredes.push(new Rectangulo("white", 40, 10, 40, 40, null));
+      paredes.push(new Rectangulo("white", 490, 10, 150, 40, null));
+      paredes.push(new Rectangulo("white", 10, 80, 395, 50, null));
+      paredes.push(new Rectangulo("white", 60, 10, 510, 85, null));
+      paredes.push(new Rectangulo("white", 60, 10, 220, 85, null));
+      paredes.push(new Rectangulo("white", 60, 10, 370, 85, null));
+      paredes.push(new Rectangulo("white", 66, 10, 725, 90, null));
+      paredes.push(new Rectangulo("white", 60, 10, 10, 90, null));
+      paredes.push(new Rectangulo("white", 10, 65, 175, 103, null));
+      paredes.push(new Rectangulo("white", 10, 65, 320, 103, null));
+      paredes.push(new Rectangulo("white", 10, 65, 465, 103, null));
+      paredes.push(new Rectangulo("white", 10, 65, 605, 103, null));
+      paredes.push(new Rectangulo("white", 10, 65, 675, 10, null));
+      paredes.push(new Rectangulo("white", 10, 65, 110, 10, null));
+      paredes.push(new Rectangulo("white", 5, 5, 45, 132, null));
+      paredes.push(new Rectangulo("white", 5, 5, 110, 132, null));
+      paredes.push(new Rectangulo("white", 5, 5, 245, 132, null));
+      paredes.push(new Rectangulo("white", 5, 5, 535, 132, null));
+      paredes.push(new Rectangulo("white", 5, 5, 740, 132, null));
+      paredes.push(new Rectangulo("white", 5, 5, 675, 132, null));
+      paredes.push(new Rectangulo("white", 5, 5, 675, 132, null));
+
+      //abajo
+
+      paredes.push(new Rectangulo("white", 490, 10, 150, 345, null));
+      paredes.push(new Rectangulo("white", 40, 10, 40, 345, null));
+      paredes.push(new Rectangulo("white", 40, 10, 720, 345, null));
+      paredes.push(new Rectangulo("white", 10, 80, 395, 265, null));
+      paredes.push(new Rectangulo("white", 60, 10, 510, 300, null));
+      paredes.push(new Rectangulo("white", 60, 10, 220, 300, null));
+      paredes.push(new Rectangulo("white", 60, 10, 370, 300, null));
+      paredes.push(new Rectangulo("white", 60, 10, 10, 300, null));
+      paredes.push(new Rectangulo("white", 65, 10, 725, 300, null));
+      paredes.push(new Rectangulo("white", 10, 65, 175, 233, null));
+      paredes.push(new Rectangulo("white", 10, 65, 320, 233, null));
+      paredes.push(new Rectangulo("white", 10, 65, 465, 233, null));
+      paredes.push(new Rectangulo("white", 10, 65, 605, 233, null));
+      paredes.push(new Rectangulo("white", 10, 65, 675, 325, null));
+      paredes.push(new Rectangulo("white", 10, 65, 110, 325, null));
+      paredes.push(new Rectangulo("white", 5, 5, 45, 260, null));
+      paredes.push(new Rectangulo("white", 5, 5, 110, 260, null));
+      paredes.push(new Rectangulo("white", 5, 5, 245, 260, null));
+      paredes.push(new Rectangulo("white", 5, 5, 535, 260, null));
+      paredes.push(new Rectangulo("white", 5, 5, 740, 260, null));
+      paredes.push(new Rectangulo("white", 5, 5, 675, 260, null));
+
+      //puntos
+
+      for (let x = 20; x <= 770; x += 25) {
+        puntos.push(new Punto(x, 25, 4, "yellow"));
+      }
+
+      for (let x = 20; x <= 770; x += 25) {
+        puntos.push(new Punto(x, 375, 4, "yellow"));
+      }
+
+      for (let x = 20; x <= 770; x += 25) {
+        puntos.push(new Punto(x, 70, 4, "yellow"));
+      }
+
+      for (let x = 20; x <= 770; x += 25) {
+        puntos.push(new Punto(x, 115, 4, "yellow"));
+      }
+
+      for (let x = 20; x <= 770; x += 25) {
+        puntos.push(new Punto(x, 152, 4, "yellow"));
+      }
+
+      for (let x = 20; x <= 145; x += 25) {
+        puntos.push(new Punto(x, 200, 4, "yellow"));
+      }
+
+      puntos.push(new Punto(276, 200, 4, "yellow"));
+      puntos.push(new Punto(230, 200, 4, "yellow"));
+      puntos.push(new Punto(520, 200, 4, "yellow"));
+      puntos.push(new Punto(560, 200, 4, "yellow"));
+
+      for (let x = 647; x <= 775; x += 25) {
+        puntos.push(new Punto(x, 200, 4, "yellow"));
+      }
+
+      for (let x = 20; x <= 770; x += 25) {
+        puntos.push(new Punto(x, 245, 4, "yellow"));
+      }
+
+      for (let x = 20; x <= 770; x += 25) {
+        puntos.push(new Punto(x, 280, 4, "yellow"));
+      }
+
+      for (let x = 20; x <= 770; x += 25) {
+        puntos.push(new Punto(x, 330, 4, "yellow"));
+      }
+
+      function rotarJugador() {
+        switch (direccion) {
+          case "up":
+            anguloRotacion = -Math.PI / 2;
+            break;
+          case "down":
+            anguloRotacion = Math.PI / 2;
+            break;
+          case "left":
+            anguloRotacion = Math.PI;
+            break;
+          case "rigth":
+            anguloRotacion = 0;
+            break;
+        }
+      }
+
+      document.addEventListener("keypress", function (e) {
+        if (!tiempoIniciado) {
+          inicioTiempo = Date.now();
+          tiempoIniciado = true;
+        }
+
+        switch (e.keyCode) {
+          case 119: 
+            direccion = "up";
+            sonido.play();
+            break;
+          case 115: 
+            direccion = "down";
+            sonido.play();
+            break;
+          case 97: 
+            direccion = "left";
+            sonido.play();
+            break;
+          case 100: 
+            direccion = "rigth";
+            sonido.play();
+            break;
+        }
+        rotarJugador();
+      });
+
+      function actualizar() {
+        if (tiempoIniciado) {
+          const tiempoTranscurrido = (
+            (Date.now() - inicioTiempo) /
+            1000
+          ).toFixed(1);
+          temporizador.textContent = `Tiempo: ${tiempoTranscurrido} segundos | Puntuación: ${puntuacion}`;
+        }
+
+        switch (direccion) {
+          case "up":
+            jugador.y -= velocidad;
+            if (jugador.y < 0) jugador.y = miCanvas.height;
+            break;
+          case "down":
+            jugador.y += velocidad;
+            if (jugador.y > miCanvas.height) jugador.y = 0;
+            break;
+          case "left":
+            jugador.x -= velocidad;
+            if (jugador.x < 0) jugador.x = miCanvas.width;
+            break;
+          case "rigth":
+            jugador.x += velocidad;
+            if (jugador.x > miCanvas.width) jugador.x = 0;
+            break;
+        }
+
+        paredes.forEach(function (pared) {
+          if (jugador.colision(pared)) {
+            switch (direccion) {
+              case "up":
+                jugador.y += velocidad;
+                break;
+              case "down":
+                jugador.y -= velocidad;
+                break;
+              case "left":
+                jugador.x += velocidad;
+                break;
+              case "rigthd":
+                jugador.x -= velocidad;
+                break;
+            }
+          }
+        });
+
+        puntos.forEach((punto, index) => {
+          let dx = jugador.x + jugador.w / 2 - punto.x;
+          let dy = jugador.y + jugador.h / 2 - punto.y;
+          let distancia = Math.sqrt(dx * dx + dy * dy);
+
+          if (distancia < punto.radio + jugador.w / 2) {
+            puntos.splice(index, 1);
+            puntuacion += 1;
+          }
+        });
+      }
+
+      function pintar() {
+        ctx.clearRect(0, 0, 800, 400);
+
+        ctx.save();
+        ctx.translate(jugador.x + jugador.w / 2, jugador.y + jugador.h / 2);
+        ctx.rotate(anguloRotacion);
+        ctx.drawImage(
+          imagenPacman,
+          -jugador.w / 2,
+          -jugador.h / 2,
+          jugador.w,
+          jugador.h
+        );
+        ctx.restore();
+
+        paredes.forEach(function (pared) {
+          ctx.fillStyle = pared.color;
+          ctx.fillRect(pared.x, pared.y, pared.w, pared.h);
+          ctx.strokeRect(pared.x, pared.y, pared.w, pared.h);
+        });
+
+        puntos.forEach((punto) => {
+          punto.dibujar();
+        });
+
+        actualizar();
+        requestAnimationFrame(pintar);
+      }
+
+      imagenPacman.onload = function () {
+        requestAnimationFrame(pintar);
+      };
+    </script>
+  </body>
 </html>
