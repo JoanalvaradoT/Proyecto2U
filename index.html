@@ -11,25 +11,40 @@
       canvas {
         background-color: rgb(124, 235, 255);
       }
+      #mensaje-perdido {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 48px;
+        color: red;
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
-
     <canvas id="miCanvas" width="800" height="400"></canvas>
     <p id="temporizador" style="font-size: 20px">Tiempo: 0 | Puntuación: 0</p>
+    <div id="mensaje-perdido">¡Has perdido!</div>
 
     <script type="text/javascript">
       const miCanvas = document.getElementById("miCanvas");
       const ctx = miCanvas.getContext("2d");
       const temporizador = document.getElementById("temporizador");
+      const mensajePerdido = document.getElementById("mensaje-perdido");
 
-      var sonido = new Audio("bless.mp3");
+      var sonido = new Audio("pacman-music.mp3");
+      var sonidoComerPez = new Audio("comerPez.mp3");
+      var sonidoPerder = new Audio("pacmanPerder.mp3"); 
       var paredes = [];
       var puntos = [];
       var peces = [];
+      var orcas = []; 
       var puntuacion = 0;
       var velocidad = 1;
       var tiempoVelocidad = 0;
+      var juegoTerminado = false; 
 
       class Rectangulo {
         constructor(color, w, h, x, y, velocidad) {
@@ -59,8 +74,6 @@
           this.color = color;
         }
 
-    
-
         dibujar() {
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.radio, 0, 2 * Math.PI, false);
@@ -73,24 +86,9 @@
         constructor(x, y) {
           this.x = x;
           this.y = y;
-          this.radio = 20;
+          this.radio = 10;
           this.imagen = new Image();
           this.imagen.src = "orca.png";
-          this.velocidad = 2;
-          this.direccion = 1; // 1 para derecha, -1 para izquierda
-        }
-
-        mover() {
-          this.x += this.velocidad * this.direccion;
-          
-          // Si la orca llega a 600, cambia de dirección
-          if (this.x >= 600) {
-            this.direccion = -1;
-          }
-          // Si la orca llega a 150, cambia de dirección para ir a la derecha
-          if (this.x <= 150) {
-            this.direccion = 1;
-          }
         }
 
         dibujar() {
@@ -98,8 +96,8 @@
             this.imagen,
             this.x - this.radio,
             this.y - this.radio,
-            40,
-            40
+            20,
+            20
           );
         }
       }
@@ -124,8 +122,6 @@
         }
       }
 
-      
-
       var imagenPacman = new Image();
       imagenPacman.src = "tiburon.png";
 
@@ -135,17 +131,21 @@
       var anguloRotacion = 0;
       var inicioTiempo = null;
       var tiempoIniciado = false;
-      var orca = new Orca(150, 40);
 
-     
+   
+      orcas.push(new Orca(276, 200));
+      orcas.push(new Orca(520, 200));
+      orcas.push(new Orca(25, 70));
+      orcas.push(new Orca(775, 115));
+      orcas.push(new Orca(25, 330));
+
+
       peces.push(new Pez(25, 25));
       peces.push(new Pez(775, 25));
       peces.push(new Pez(25, 375));
       peces.push(new Pez(775, 375));
       peces.push(new Pez(400, 375));
       peces.push(new Pez(400, 25));
-
-      
 
       //azules
 
@@ -193,7 +193,6 @@
       paredes.push(new Rectangulo("white", 5, 5, 535, 132, null));
       paredes.push(new Rectangulo("white", 5, 5, 740, 132, null));
       paredes.push(new Rectangulo("white", 5, 5, 675, 132, null));
-      paredes.push(new Rectangulo("white", 5, 5, 675, 132, null));
 
       //abajo
 
@@ -201,25 +200,23 @@
       paredes.push(new Rectangulo("white", 20, 10, 50, 345, null));
       paredes.push(new Rectangulo("white", 20, 10, 730, 345, null));
       paredes.push(new Rectangulo("white", 10, 80, 395, 265, null));
-      paredes.push(new Rectangulo("white", 60, 5, 510, 300, null));
-      paredes.push(new Rectangulo("white", 60, 5, 220, 300, null));
-      paredes.push(new Rectangulo("white", 60, 5, 370, 300, null));
+      paredes.push(new Rectangulo("white", 60, 5, 370, 295, null));
+      paredes.push(new Rectangulo("white", 60, 5, 510, 295, null));
+      paredes.push(new Rectangulo("white", 60, 5, 220, 295, null));
+      paredes.push(new Rectangulo("white", 66, 5, 725, 300, null));
       paredes.push(new Rectangulo("white", 60, 5, 10, 300, null));
-      paredes.push(new Rectangulo("white", 65, 5, 725, 300, null));
-      paredes.push(new Rectangulo("white", 10, 65, 175, 233, null));
-      paredes.push(new Rectangulo("white", 10, 65, 320, 233, null));
-      paredes.push(new Rectangulo("white", 10, 65, 465, 233, null));
-      paredes.push(new Rectangulo("white", 10, 65, 605, 233, null));
-      paredes.push(new Rectangulo("white", 10, 65, 675, 325, null));
-      paredes.push(new Rectangulo("white", 10, 65, 110, 325, null));
+      paredes.push(new Rectangulo("white", 10, 65, 605, 232, null));
+      paredes.push(new Rectangulo("white", 10, 65, 465, 232, null));
+      paredes.push(new Rectangulo("white", 10, 65, 320, 232, null));
+      paredes.push(new Rectangulo("white", 10, 65, 175, 232, null));
+      paredes.push(new Rectangulo("white", 10, 65, 675, 315, null));
+      paredes.push(new Rectangulo("white", 10, 65, 110, 315, null));
       paredes.push(new Rectangulo("white", 5, 5, 45, 260, null));
       paredes.push(new Rectangulo("white", 5, 5, 110, 260, null));
       paredes.push(new Rectangulo("white", 5, 5, 245, 260, null));
       paredes.push(new Rectangulo("white", 5, 5, 535, 260, null));
       paredes.push(new Rectangulo("white", 5, 5, 740, 260, null));
       paredes.push(new Rectangulo("white", 5, 5, 675, 260, null));
-
-     
 
       for (let x = 20; x <= 770; x += 25) {
         puntos.push(new Punto(x, 25, 4, "yellow"));
@@ -229,11 +226,11 @@
         puntos.push(new Punto(x, 375, 4, "yellow"));
       }
 
-      for (let x = 20; x <= 770; x += 25) {
+      for (let x = 100; x <= 770; x += 25) {
         puntos.push(new Punto(x, 70, 4, "yellow"));
       }
 
-      for (let x = 20; x <= 770; x += 25) {
+      for (let x = 20; x <= 740; x += 25) {
         puntos.push(new Punto(x, 115, 4, "yellow"));
       }
 
@@ -245,9 +242,7 @@
         puntos.push(new Punto(x, 200, 4, "yellow"));
       }
 
-      puntos.push(new Punto(276, 200, 4, "yellow"));
       puntos.push(new Punto(230, 200, 4, "yellow"));
-      puntos.push(new Punto(520, 200, 4, "yellow"));
       puntos.push(new Punto(560, 200, 4, "yellow"));
 
       for (let x = 647; x <= 775; x += 25) {
@@ -262,7 +257,7 @@
         puntos.push(new Punto(x, 280, 4, "yellow"));
       }
 
-      for (let x = 20; x <= 770; x += 25) {
+      for (let x = 70; x <= 770; x += 25) {
         puntos.push(new Punto(x, 330, 4, "yellow"));
       }
 
@@ -290,37 +285,44 @@
           tiempoIniciado = true;
         }
 
-        switch (e.keyCode) {
-          case 119: 
-            direccion = "up";
-            sonido.play();
-            break;
-          case 115: 
-            direccion = "down";
-            sonido.play();
-            break;
-          case 97: 
-            direccion = "left";
-            sonido.play();
-            break;
-          case 100: 
-            direccion = "rigth";
-            sonido.play();
-            break;
+        if (!juegoTerminado) {
+          switch (e.keyCode) {
+            case 119: 
+              direccion = "up";
+              sonido.play();
+              break;
+            case 115:
+              direccion = "down";
+              sonido.play();
+              break;
+            case 97: 
+              direccion = "left";
+              sonido.play();
+              break;
+            case 100: 
+              direccion = "rigth";
+              sonido.play();
+              break;
+          }
+          rotarJugador();
         }
-        rotarJugador();
       });
 
       function actualizar() {
-        if (tiempoIniciado) {
+
+        if(puntuacion >= 308){
+
+          alert("has ganado")
+          exit()
+
+        }
+        if (tiempoIniciado && !juegoTerminado) {
           const tiempoTranscurrido = (
-            (Date.now() - inicioTiempo) /
-            1000
+            (Date.now() - inicioTiempo) / 1000
           ).toFixed(1);
           temporizador.textContent = `Tiempo: ${tiempoTranscurrido} segundos | Puntuación: ${puntuacion}`;
         }
 
-       
         if (tiempoVelocidad > 0) {
           tiempoVelocidad -= 1;
           if (tiempoVelocidad <= 0) {
@@ -347,7 +349,6 @@
             break;
         }
 
-        
         paredes.forEach(function (pared) {
           if (jugador.colision(pared)) {
             switch (direccion) {
@@ -367,7 +368,18 @@
           }
         });
 
-        
+        orcas.forEach((orca) => {
+          let dx = jugador.x + jugador.w / 2 - orca.x;
+          let dy = jugador.y + jugador.h / 2 - orca.y;
+          let distancia = Math.sqrt(dx * dx + dy * dy);
+
+          if (distancia < orca.radio + jugador.w / 2) {
+            sonidoPerder.play();
+            mensajePerdido.style.display = "block";
+            juegoTerminado = true;
+          }
+        });
+
         puntos.forEach((punto, index) => {
           let dx = jugador.x + jugador.w / 2 - punto.x;
           let dy = jugador.y + jugador.h / 2 - punto.y;
@@ -379,60 +391,50 @@
           }
         });
 
-      
         peces.forEach((pez, index) => {
           let dx = jugador.x + jugador.w / 2 - pez.x;
           let dy = jugador.y + jugador.h / 2 - pez.y;
           let distancia = Math.sqrt(dx * dx + dy * dy);
 
           if (distancia < pez.radio + jugador.w / 2) {
-            peces.splice(index, 1); 
-            velocidad = 2; 
-            tiempoVelocidad = 400; 
+            sonidoComerPez.play();
+            peces.splice(index, 1);
+            puntuacion += 10;
+            velocidad = 2;
+            tiempoVelocidad = 500;
           }
         });
       }
 
-      function pintar() {
-        ctx.clearRect(0, 0, 800, 400);
-
+      function dibujar() {
+        ctx.clearRect(0, 0, miCanvas.width, miCanvas.height);
         ctx.save();
         ctx.translate(jugador.x + jugador.w / 2, jugador.y + jugador.h / 2);
         ctx.rotate(anguloRotacion);
-        ctx.drawImage(
-          imagenPacman,
-          -jugador.w / 2,
-          -jugador.h / 2,
-          jugador.w,
-          jugador.h
-        );
+        ctx.drawImage(imagenPacman, -jugador.w / 2, -jugador.h / 2, 30, 30);
         ctx.restore();
 
         paredes.forEach(function (pared) {
           ctx.fillStyle = pared.color;
           ctx.fillRect(pared.x, pared.y, pared.w, pared.h);
-          ctx.strokeRect(pared.x, pared.y, pared.w, pared.h);
         });
 
-       
-        puntos.forEach((punto) => {
-          punto.dibujar();
-        });
+        puntos.forEach((punto) => punto.dibujar());
 
-       
-        peces.forEach((pez) => {
-          pez.dibujar();
-        });
+        orcas.forEach((orca) => orca.dibujar());
 
-
-       
-        actualizar();
-        requestAnimationFrame(pintar);
+        peces.forEach((pez) => pez.dibujar());
       }
 
-      imagenPacman.onload = function () {
-        requestAnimationFrame(pintar);
-      };
+      function ciclo() {
+        if (!juegoTerminado) {
+          actualizar();
+          dibujar();
+          requestAnimationFrame(ciclo);
+        }
+      }
+
+      ciclo();
     </script>
   </body>
 </html>
