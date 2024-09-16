@@ -14,6 +14,7 @@
     </style>
   </head>
   <body>
+
     <canvas id="miCanvas" width="800" height="400"></canvas>
     <p id="temporizador" style="font-size: 20px">Tiempo: 0 | Puntuación: 0</p>
 
@@ -25,7 +26,10 @@
       var sonido = new Audio("bless.mp3");
       var paredes = [];
       var puntos = [];
+      var peces = [];
       var puntuacion = 0;
+      var velocidad = 1;
+      var tiempoVelocidad = 0;
 
       class Rectangulo {
         constructor(color, w, h, x, y, velocidad) {
@@ -55,6 +59,8 @@
           this.color = color;
         }
 
+    
+
         dibujar() {
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.radio, 0, 2 * Math.PI, false);
@@ -63,6 +69,63 @@
         }
       }
 
+      class Orca {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.radio = 20;
+          this.imagen = new Image();
+          this.imagen.src = "orca.png";
+          this.velocidad = 2;
+          this.direccion = 1; // 1 para derecha, -1 para izquierda
+        }
+
+        mover() {
+          this.x += this.velocidad * this.direccion;
+          
+          // Si la orca llega a 600, cambia de dirección
+          if (this.x >= 600) {
+            this.direccion = -1;
+          }
+          // Si la orca llega a 150, cambia de dirección para ir a la derecha
+          if (this.x <= 150) {
+            this.direccion = 1;
+          }
+        }
+
+        dibujar() {
+          ctx.drawImage(
+            this.imagen,
+            this.x - this.radio,
+            this.y - this.radio,
+            40,
+            40
+          );
+        }
+      }
+
+      class Pez {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.radio = 15;
+          this.imagen = new Image();
+          this.imagen.src = "pez-payaso.png";
+        }
+
+        dibujar() {
+          ctx.drawImage(
+            this.imagen,
+            this.x - this.radio,
+            this.y - this.radio,
+            30,
+            30
+          );
+        }
+      }
+
+      
+
       var imagenPacman = new Image();
       imagenPacman.src = "tiburon.png";
 
@@ -70,9 +133,19 @@
 
       var direccion = "";
       var anguloRotacion = 0;
-      var velocidad = 1;
       var inicioTiempo = null;
       var tiempoIniciado = false;
+      var orca = new Orca(150, 40);
+
+     
+      peces.push(new Pez(25, 25));
+      peces.push(new Pez(775, 25));
+      peces.push(new Pez(25, 375));
+      peces.push(new Pez(775, 375));
+      peces.push(new Pez(400, 375));
+      peces.push(new Pez(400, 25));
+
+      
 
       //azules
 
@@ -99,15 +172,15 @@
 
       //arriba
 
-      paredes.push(new Rectangulo("white", 40, 10, 720, 40, null));
-      paredes.push(new Rectangulo("white", 40, 10, 40, 40, null));
-      paredes.push(new Rectangulo("white", 490, 10, 150, 40, null));
+      paredes.push(new Rectangulo("white", 20, 10, 730, 45, null));
+      paredes.push(new Rectangulo("white", 20, 10, 50, 45, null));
+      paredes.push(new Rectangulo("white", 470, 10, 160, 50, null));
       paredes.push(new Rectangulo("white", 10, 80, 395, 50, null));
-      paredes.push(new Rectangulo("white", 60, 10, 510, 85, null));
-      paredes.push(new Rectangulo("white", 60, 10, 220, 85, null));
-      paredes.push(new Rectangulo("white", 60, 10, 370, 85, null));
-      paredes.push(new Rectangulo("white", 66, 10, 725, 90, null));
-      paredes.push(new Rectangulo("white", 60, 10, 10, 90, null));
+      paredes.push(new Rectangulo("white", 60, 5, 510, 90, null));
+      paredes.push(new Rectangulo("white", 60, 5, 220, 90, null));
+      paredes.push(new Rectangulo("white", 60, 5, 370, 90, null));
+      paredes.push(new Rectangulo("white", 66, 5, 725, 90, null));
+      paredes.push(new Rectangulo("white", 60, 5, 10, 90, null));
       paredes.push(new Rectangulo("white", 10, 65, 175, 103, null));
       paredes.push(new Rectangulo("white", 10, 65, 320, 103, null));
       paredes.push(new Rectangulo("white", 10, 65, 465, 103, null));
@@ -124,15 +197,15 @@
 
       //abajo
 
-      paredes.push(new Rectangulo("white", 490, 10, 150, 345, null));
-      paredes.push(new Rectangulo("white", 40, 10, 40, 345, null));
-      paredes.push(new Rectangulo("white", 40, 10, 720, 345, null));
+      paredes.push(new Rectangulo("white", 470, 10, 160, 335, null));
+      paredes.push(new Rectangulo("white", 20, 10, 50, 345, null));
+      paredes.push(new Rectangulo("white", 20, 10, 730, 345, null));
       paredes.push(new Rectangulo("white", 10, 80, 395, 265, null));
-      paredes.push(new Rectangulo("white", 60, 10, 510, 300, null));
-      paredes.push(new Rectangulo("white", 60, 10, 220, 300, null));
-      paredes.push(new Rectangulo("white", 60, 10, 370, 300, null));
-      paredes.push(new Rectangulo("white", 60, 10, 10, 300, null));
-      paredes.push(new Rectangulo("white", 65, 10, 725, 300, null));
+      paredes.push(new Rectangulo("white", 60, 5, 510, 300, null));
+      paredes.push(new Rectangulo("white", 60, 5, 220, 300, null));
+      paredes.push(new Rectangulo("white", 60, 5, 370, 300, null));
+      paredes.push(new Rectangulo("white", 60, 5, 10, 300, null));
+      paredes.push(new Rectangulo("white", 65, 5, 725, 300, null));
       paredes.push(new Rectangulo("white", 10, 65, 175, 233, null));
       paredes.push(new Rectangulo("white", 10, 65, 320, 233, null));
       paredes.push(new Rectangulo("white", 10, 65, 465, 233, null));
@@ -146,7 +219,7 @@
       paredes.push(new Rectangulo("white", 5, 5, 740, 260, null));
       paredes.push(new Rectangulo("white", 5, 5, 675, 260, null));
 
-      //puntos
+     
 
       for (let x = 20; x <= 770; x += 25) {
         puntos.push(new Punto(x, 25, 4, "yellow"));
@@ -193,6 +266,7 @@
         puntos.push(new Punto(x, 330, 4, "yellow"));
       }
 
+      
       function rotarJugador() {
         switch (direccion) {
           case "up":
@@ -246,6 +320,14 @@
           temporizador.textContent = `Tiempo: ${tiempoTranscurrido} segundos | Puntuación: ${puntuacion}`;
         }
 
+       
+        if (tiempoVelocidad > 0) {
+          tiempoVelocidad -= 1;
+          if (tiempoVelocidad <= 0) {
+            velocidad = 1;
+          }
+        }
+
         switch (direccion) {
           case "up":
             jugador.y -= velocidad;
@@ -265,6 +347,7 @@
             break;
         }
 
+        
         paredes.forEach(function (pared) {
           if (jugador.colision(pared)) {
             switch (direccion) {
@@ -277,13 +360,14 @@
               case "left":
                 jugador.x += velocidad;
                 break;
-              case "rigthd":
+              case "rigth":
                 jugador.x -= velocidad;
                 break;
             }
           }
         });
 
+        
         puntos.forEach((punto, index) => {
           let dx = jugador.x + jugador.w / 2 - punto.x;
           let dy = jugador.y + jugador.h / 2 - punto.y;
@@ -292,6 +376,19 @@
           if (distancia < punto.radio + jugador.w / 2) {
             puntos.splice(index, 1);
             puntuacion += 1;
+          }
+        });
+
+      
+        peces.forEach((pez, index) => {
+          let dx = jugador.x + jugador.w / 2 - pez.x;
+          let dy = jugador.y + jugador.h / 2 - pez.y;
+          let distancia = Math.sqrt(dx * dx + dy * dy);
+
+          if (distancia < pez.radio + jugador.w / 2) {
+            peces.splice(index, 1); 
+            velocidad = 2; 
+            tiempoVelocidad = 400; 
           }
         });
       }
@@ -317,10 +414,18 @@
           ctx.strokeRect(pared.x, pared.y, pared.w, pared.h);
         });
 
+       
         puntos.forEach((punto) => {
           punto.dibujar();
         });
 
+       
+        peces.forEach((pez) => {
+          pez.dibujar();
+        });
+
+
+       
         actualizar();
         requestAnimationFrame(pintar);
       }
